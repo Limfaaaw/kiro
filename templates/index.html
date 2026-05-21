@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EEE3089F Project 4 - Network Coverage - VSCETH003</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ecf0f1;
+        }
+        
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: #34495e;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab:hover {
+            background-color: #425566;
+        }
+        
+        .tab.active {
+            background-color: #3498db;
+        }
+
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: #34495e;
+        }
+        
+        .form-group input {
+            padding: 8px 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            max-width: 300px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background-color: #229954;
+        }
+
+        
+        .status-box {
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .results-box {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .results-box h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .results-box pre {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        
+        .plot-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .plot-container img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="header">
+        EEE3089F Project 4 - Network Coverage - VSCETH003
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="openTab(event, 'antenna-tab')">Antenna Pattern</button>
+            <button class="tab" onclick="openTab(event, 'input-tab')">Input Parameters</button>
+            <button class="tab" onclick="openTab(event, 'results-tab')">Results</button>
+            <button class="tab" onclick="openTab(event, 'geometry-tab')">Geometry Plot</button>
+            <button class="tab" onclick="openTab(event, 'pattern-tab')">Antenna Pattern Plot</button>
+        </div>
+
+        <!-- Antenna Pattern Tab -->
+        <div id="antenna-tab" class="tab-content active">
+            <div class="section">
+                <h3>Load Antenna Gain Pattern</h3>
+                <div class="form-group">
+                    <label>CSV Filename:</label>
+                    <input type="text" id="csv-filename" value="sample_antenna_pattern.csv">
+                </div>
+                <button class="btn btn-success" onclick="loadPattern()">Load Pattern</button>
+            </div>
+            
+            <div class="section">
+                <h3>Pattern Status</h3>
+                <div class="status-box" id="pattern-status">No antenna pattern loaded.
+
+Please load a CSV file.</div>
+            </div>
+        </div>
+
+        <!-- Input Parameters Tab -->
+        <div id="input-tab" class="tab-content">
+            <div class="section">
+                <h3>Transmit Signal Parameters</h3>
+                <div class="form-group">
+                    <label>Horizontal Polarization Power (dBm):</label>
+                    <input type="number" step="0.1" id="power-h" value="40.0">
+                </div>
+                <div class="form-group">
+                    <label>Vertical Polarization Power (dBm):</label>
+                    <input type="number" step="0.1" id="power-v" value="40.0">
+                </div>
+                <div class="form-group">
+                    <label>Phase Shift (H-V) [degrees]:</label>
+                    <input type="number" step="0.1" id="phase-shift" value="0.0">
+                </div>
+                <div class="form-group">
+                    <label>Frequency (MHz):</label>
+                    <input type="number" step="0.1" id="frequency" value="2400">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Antenna Position</h3>
+                <div class="form-group">
+                    <label>Antenna X-coordinate (m):</label>
+                    <input type="number" step="0.1" id="antenna-x" value="0.0">
+                </div>
+                <div class="form-group">
+                    <label>Antenna Y-coordinate (m):</label>
+                    <input type="number" step="0.1" id="antenna-y" value="20.0">
+                </div>
+            </div>
+
+
+            <div class="section">
+                <h3>Ground Medium Properties</h3>
+                <div class="form-group">
+                    <label>Relative Permittivity (εᵣ):</label>
+                    <input type="number" step="0.1" id="epsilon-r" value="15.0">
+                </div>
+                <div class="form-group">
+                    <label>Conductivity (S/m):</label>
+                    <input type="number" step="0.001" id="sigma" value="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Ground Slope (m for y=mx+c):</label>
+                    <input type="number" step="0.01" id="slope-m" value="0.0">
+                </div>
+                <div class="form-group">
+                    <label>Ground Intercept (c for y=mx+c):</label>
+                    <input type="number" step="0.1" id="intercept-c" value="0.0">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Receiver Position</h3>
+                <div class="form-group">
+                    <label>Receiver X-coordinate (m):</label>
+                    <input type="number" step="0.1" id="rx-x" value="100.0">
+                </div>
+                <div class="form-group">
+                    <label>Receiver Y-coordinate (m):</label>
+                    <input type="number" step="0.1" id="rx-y" value="5.0">
+                </div>
+            </div>
+
+            <div style="text-align: center; padding: 20px;">
+                <button class="btn btn-success" onclick="calculateFields()" style="font-size: 18px; padding: 15px 40px;">
+                    ⚡ Calculate Fields
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Tab -->
+        <div id="results-tab" class="tab-content">
+            <div id="results-alert"></div>
+            <div class="results-container">
+                <div class="results-box">
+                    <h3>Electric Field Results</h3>
+                    <pre id="e-field-results">No calculations performed yet.
+
+Go to "Input Parameters" tab and click "Calculate Fields".</pre>
+                </div>
+                <div class="results-box">
+                    <h3>Magnetic Field & Reflection Point</h3>
+                    <pre id="h-field-results"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geometry Plot Tab -->
+        <div id="geometry-tab" class="tab-content">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn" onclick="plotGeometry()">📊 Plot Geometry</button>
+            </div>
+            <div class="plot-container" id="geometry-plot"></div>
+        </div>
+
+        <!-- Antenna Pattern Plot Tab -->
+        <div id="pattern-tab" class="tab-content">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn" onclick="plotAntenna()">📊 Plot Antenna Pattern</button>
+            </div>
+            <div class="plot-container" id="antenna-plot"></div>
+        </div>
+    </div>
+
+
+
+    <script>
+        let calculationData = null;
+
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            
+            const tabs = document.getElementsByClassName("tab");
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        async function loadPattern() {
+            const filename = document.getElementById('csv-filename').value;
+            const statusBox = document.getElementById('pattern-status');
+            
+            statusBox.textContent = 'Loading pattern...';
+            
+            try {
+                const response = await fetch('/api/load_pattern', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({filename: filename})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusBox.textContent = `✓ Antenna pattern loaded successfully!
+
+File: ${filename}
+Data points: ${data.data_points}
+Elevation range: ${data.elevation_range[0].toFixed(1)}° to ${data.elevation_range[1].toFixed(1)}°
+Gain range: ${data.gain_range[0].toFixed(2)} to ${data.gain_range[1].toFixed(2)} dBi
+
+You can now:
+  • View pattern in 'Antenna Pattern Plot' tab
+  • Enter parameters in 'Input Parameters' tab
+  • Calculate fields`;
+                    alert('Antenna pattern loaded successfully!');
+                } else {
+                    statusBox.textContent = `Error loading pattern:\n${data.error}`;
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                statusBox.textContent = `Error: ${error.message}`;
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function calculateFields() {
+            const data = {
+                power_h: parseFloat(document.getElementById('power-h').value),
+                power_v: parseFloat(document.getElementById('power-v').value),
+                phase_shift: parseFloat(document.getElementById('phase-shift').value),
+                frequency: parseFloat(document.getElementById('frequency').value),
+                antenna_x: parseFloat(document.getElementById('antenna-x').value),
+                antenna_y: parseFloat(document.getElementById('antenna-y').value),
+                epsilon_r: parseFloat(document.getElementById('epsilon-r').value),
+                sigma: parseFloat(document.getElementById('sigma').value),
+                slope_m: parseFloat(document.getElementById('slope-m').value),
+                intercept_c: parseFloat(document.getElementById('intercept-c').value),
+                rx_x: parseFloat(document.getElementById('rx-x').value),
+                rx_y: parseFloat(document.getElementById('rx-y').value)
+            };
+
+
+            
+            try {
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    calculationData = result;
+                    displayResults(result);
+                    
+                    // Switch to results tab
+                    document.querySelector('.tabs').children[2].click();
+                    
+                    document.getElementById('results-alert').innerHTML = 
+                        '<div class="alert alert-success">✓ Field calculation completed successfully!</div>';
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function displayResults(data) {
+            const r = data.results;
+            
+            const eFieldText = `${'='.repeat(60)}
+ELECTRIC FIELD RESULTS
+${'='.repeat(60)}
+
+Transmitter Position: (${data.tx_params.x.toFixed(2)}, ${data.tx_params.y.toFixed(2)}) m
+Receiver Position: (${data.rx_pos[0].toFixed(2)}, ${data.rx_pos[1].toFixed(2)}) m
+Frequency: ${(data.results.total_e_magnitude > 0 ? parseFloat(document.getElementById('frequency').value)/1000 : 0).toFixed(3)} GHz
+
+${'-'.repeat(60)}
+E-Field Components:
+${'-'.repeat(60)}
+H-polarization:
+  Magnitude: ${r.e_field_h_mag.toExponential(6)} V/m
+  Phase: ${r.e_field_h_phase.toFixed(2)}°
+  dBV/m: ${(20*Math.log10(r.e_field_h_mag)).toFixed(2)} dB
+
+V-polarization:
+  Magnitude: ${r.e_field_v_mag.toExponential(6)} V/m
+  Phase: ${r.e_field_v_phase.toFixed(2)}°
+  dBV/m: ${(20*Math.log10(r.e_field_v_mag)).toFixed(2)} dB
+
+${'-'.repeat(60)}
+Total E-Field:
+${'-'.repeat(60)}
+Magnitude: ${r.total_e_magnitude.toExponential(6)} V/m
+dBV/m: ${r.total_e_db.toFixed(2)} dB`;
+
+            const hFieldText = `${'='.repeat(60)}
+MAGNETIC FIELD RESULTS
+${'='.repeat(60)}
+
+H-Field Magnitude: ${r.h_field.toExponential(6)} A/m
+H-Field (dBA/m): ${r.h_field_db.toFixed(2)} dB
+
+${'='.repeat(60)}
+REFLECTION POINT
+${'='.repeat(60)}
+
+Coordinates: (${r.reflection_point[0].toFixed(3)}, ${r.reflection_point[1].toFixed(3)}) m
+
+${'='.repeat(60)}
+GROUND PROPERTIES
+${'='.repeat(60)}
+
+Relative Permittivity: ${parseFloat(document.getElementById('epsilon-r').value).toFixed(2)}
+Conductivity: ${parseFloat(document.getElementById('sigma').value).toFixed(4)} S/m
+${data.ground.slope !== 0 ? `Ground Equation: y = ${data.ground.slope}x + ${data.ground.intercept}` : `Ground: Flat (y = ${data.ground.intercept})`}`;
+
+            document.getElementById('e-field-results').textContent = eFieldText;
+            document.getElementById('h-field-results').textContent = hFieldText;
+        }
+
+
+
+        async function plotGeometry() {
+            if (!calculationData) {
+                alert('Please calculate fields first!');
+                return;
+            }
+            
+            const plotDiv = document.getElementById('geometry-plot');
+            plotDiv.innerHTML = '<p>Generating plot...</p>';
+            
+            const data = {
+                tx_x: calculationData.tx_params.x,
+                tx_y: calculationData.tx_params.y,
+                rx_x: calculationData.rx_pos[0],
+                rx_y: calculationData.rx_pos[1],
+                reflection_point: calculationData.results.reflection_point,
+                ground_slope: calculationData.ground.slope,
+                ground_intercept: calculationData.ground.intercept
+            };
+            
+            try {
+                const response = await fetch('/api/plot_geometry', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    plotDiv.innerHTML = `<img src="data:image/png;base64,${result.image}" alt="Geometry Plot">`;
+                } else {
+                    plotDiv.innerHTML = `<p style="color: red;">Error: ${result.error}</p>`;
+                }
+            } catch (error) {
+                plotDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function plotAntenna() {
+            const plotDiv = document.getElementById('antenna-plot');
+            plotDiv.innerHTML = '<p>Generating plot...</p>';
+            
+            try {
+                const response = await fetch('/api/plot_antenna');
+                const result = await response.json();
+                
+                if (result.success) {
+                    plotDiv.innerHTML = `<img src="data:image/png;base64,${result.image}" alt="Antenna Pattern">`;
+                } else {
+                    plotDiv.innerHTML = `<p style="color: red;">Error: ${result.error}</p>`;
+                }
+            } catch (error) {
+                plotDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Auto-load default pattern on page load
+        window.addEventListener('load', function() {
+            loadPattern();
+        });
+    </script>
+</body>
+</html>
